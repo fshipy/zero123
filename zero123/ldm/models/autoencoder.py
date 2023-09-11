@@ -323,6 +323,7 @@ class AutoencoderKL(pl.LightningModule):
 
     def encode(self, x):
         h = self.encoder(x)
+        h = F.interpolate(h, (32, 32), mode='bicubic')
         moments = self.quant_conv(h)
         posterior = DiagonalGaussianDistribution(moments)
         return posterior

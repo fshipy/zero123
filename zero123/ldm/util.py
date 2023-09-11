@@ -37,10 +37,10 @@ def pil_rectangle_crop(im):
     im = im.crop((left, top, right, bottom))
     return im
 
-def add_margin(pil_img, color, size=256):
+def add_margin(pil_img, color, h, w):
     width, height = pil_img.size
-    result = Image.new(pil_img.mode, (size, size), color)
-    result.paste(pil_img, ((size - width) // 2, (size - height) // 2))
+    result = Image.new(pil_img.mode, (w, h), color)
+    result.paste(pil_img, ((w - width) // 2, (h - height) // 2))
     return result
 
 
@@ -60,11 +60,12 @@ def create_carvekit_interface():
     return interface
 
 
-def load_and_preprocess(interface, input_im):
+def load_and_preprocess(interface, input_im, h, w):
     '''
     :param input_im (PIL Image).
     :return image (H, W, 3) array in [0, 1].
     '''
+    result_h, result_w = h, w
     # See https://github.com/Ir1d/image-background-remove-tool
     image = input_im.convert('RGB')
 
@@ -79,8 +80,8 @@ def load_and_preprocess(interface, input_im):
     image = PIL.Image.fromarray(np.array(image))
     
     # resize image such that long edge is 512
-    image.thumbnail([200, 200], Image.Resampling.LANCZOS)
-    image = add_margin(image, (255, 255, 255), size=256)
+    image.thumbnail([200 * (result_w // 256), 200 * (result_h // 256)], Image.Resampling.LANCZOS)
+    image = add_margin(image, (255, 255, 255), h=result_h, w=result_w)
     image = np.array(image)
     
     return image
